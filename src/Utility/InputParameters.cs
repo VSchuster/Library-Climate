@@ -20,7 +20,11 @@ namespace Landis.Library.Climate
         private string spinUpClimateFileFormat;
         private string spinUpClimateFile;
         private string spinUpClimateTimeSeries;
+        // Added for Fire Climate output
+        private bool fireClimate;
         private double rHSlopeAdjust;
+        private int springStart;
+        private int winterStart;
 
 
         //---------------------------------------------------------------------
@@ -123,6 +127,19 @@ namespace Landis.Library.Climate
             }
         }
         //---------------------------------------------------------------------
+        public bool FireClimate
+        {
+            get
+            {
+                return fireClimate;
+            }
+            set
+            {
+
+                fireClimate = value;
+            }
+        }
+
         public double RHSlopeAdjust
         {
             get
@@ -133,6 +150,30 @@ namespace Landis.Library.Climate
             {
 
                 rHSlopeAdjust = value;
+            }
+        }
+
+        public int SpringStart
+        {
+            get
+            {
+                return springStart;
+            }
+            set
+            {
+                springStart = value;
+            }
+        }
+
+        public int WinterStart
+        {
+            get
+            {
+                return winterStart;
+            }
+            set
+            {
+                winterStart = value;
             }
         }
 

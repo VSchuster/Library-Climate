@@ -24,10 +24,11 @@ namespace Landis.Library.Climate
         string SpinUpClimateTimeSeries { get; set; }
         string SpinUpClimateFile { get; set; }
         string SpinUpClimateFileFormat { get; set; }
+        // Added for Fire Climate Output
+        bool FireClimate { get; set; }
         double RHSlopeAdjust { get; set; }
- 
-
-
+        int SpringStart { get; set; }
+        int WinterStart { get; set; }
         //---------------------------------------------------------------------
 
 

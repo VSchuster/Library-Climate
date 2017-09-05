@@ -38,7 +38,11 @@ namespace Landis.Library.Climate
             public const string SpinUpClimateTimeSeries = "SpinUpClimateTimeSeries";
             public const string SpinUpClimateFile = "SpinUpClimateFile";
             public const string SpinUpClimateFileFormat = "SpinUpClimateFileFormat";
+            // Added for Fire Climate Output
+            public const string FireClimate = "UsingFireClimate";
             public const string RHSlopeAdjust = "RelativeHumiditySlopeAdjust";
+            public const string SpringStart = "SpringStart";
+            public const string WinterStart = "WinterStart";
         }
 
         //---------------------------------------------------------------------
@@ -112,9 +116,84 @@ namespace Landis.Library.Climate
                 throw new ApplicationException("You are requesting a Daily Time Step but not inputting daily data:" + parameters.ClimateTimeSeries + " and " + parameters.ClimateFileFormat);
             }
 
-            InputVar<double> rHSlopeAdjust = new InputVar<double>(Names.RHSlopeAdjust);
-            ReadOptionalVar(rHSlopeAdjust);
-            parameters.RHSlopeAdjust = rHSlopeAdjust.Value;
+            InputVar<string> fireClimate = new InputVar<string>(Names.FireClimate);
+            if (ReadOptionalVar(fireClimate))
+            {
+                string usingFireClimate = fireClimate.Value;
+                usingFireClimate.ToLower();
+                if (usingFireClimate == "yes")
+                    parameters.FireClimate = true;
+                else if (usingFireClimate == "no")
+                {
+                    parameters.FireClimate = false;
+                }
+                else
+                {
+                    throw new ApplicationException(System.String.Format("UsingFireClimate variable given: {0} \n\t UsingFireClimate must be \"yes\" or \"no\"", usingFireClimate));
+                }
+            }
+            else
+            {
+                parameters.FireClimate = false;
+            }
+            
+            // Optional Vars required for Fire Weather Index calculation
+            if (parameters.FireClimate)
+            {
+                InputVar<double> rHSlopeAdjust = new InputVar<double>(Names.RHSlopeAdjust);
+                ReadVar(rHSlopeAdjust);
+                parameters.RHSlopeAdjust = rHSlopeAdjust.Value;
+
+                // ----Optional vars for Fire Climate Output ----
+
+                // Julian day = 60 if no value is given
+                InputVar<int> springStart = new InputVar<int>(Names.SpringStart);
+                if (ReadOptionalVar(springStart))
+                {
+                    parameters.SpringStart = springStart.Value;
+                }
+                else
+                {
+                    parameters.SpringStart = 60;
+                }
+                // Julian day = 336 if no value is given
+                InputVar<int> winterStart = new InputVar<int>(Names.WinterStart);
+                if (ReadOptionalVar(winterStart))
+                {
+
+                    parameters.WinterStart = winterStart.Value;
+                }
+                else
+                {
+                    parameters.WinterStart = 336;
+                }
+
+
+                // Verification checks for proper parameter inputs for Fire Climate
+                // VS: clarify with alec min(RHSlopeAdjust)
+                if (parameters.RHSlopeAdjust < 0)
+                {
+                    throw new ApplicationException(System.String.Format("RHSlopeAdjust must be greater than 0"));
+                }
+
+                if (parameters.WinterStart <= 0 || parameters.WinterStart > 365)
+                {
+                    throw new ApplicationException(System.String.Format("Winter Start date must be between 0 and 365"));
+                }
+
+                if (parameters.SpringStart <= 0 || parameters.SpringStart > 365)
+                {
+                    throw new ApplicationException(System.String.Format("Spring Start date must be between 0 and 365"));
+                }
+
+                if (parameters.SpringStart >= parameters.WinterStart)
+                {
+                    throw new ApplicationException(System.String.Format("Spring start day: {0}, cannot be later or the same day as Winter start day: {1}", parameters.SpringStart, parameters.WinterStart));
+                }
+
+
+            }
+
 
             return parameters; 
 
